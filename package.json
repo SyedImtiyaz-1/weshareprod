@@ -1,0 +1,44 @@
+{
+  "name": "socket-project",
+  "version": "1.0.0",
+  "description": "A video chat/meeting webapp using WebRTC and WebSockets (socket.io).",
+  "main": "server.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "moment": "^2.27.0",
+    "mongoose": "^8.1.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.9.1",
+    "nodemon": "^2.0.4",
+    "socket.io": "^4.7.5",
+    "sqlite3": "^5.1.7",
+    "uuid": "^8.3.0",
+    "webrtc-adapter": "^7.7.0"
+  },
+  "devDependencies": {
+    "react-app-rewired": "^2.2.1",
+    "react-scripts": "^5.0.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
