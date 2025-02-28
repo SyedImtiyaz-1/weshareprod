@@ -12,7 +12,6 @@ A video chat/meeting webapp using WebRTC and WebSockets (socket.io).
 1. List of attendees
 2. Responsive front-end for Rooms
 
-## How to Run ?
---> `npm i` or `npm install` then `npm start`
+
 
 
