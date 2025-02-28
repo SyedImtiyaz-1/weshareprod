@@ -1,4 +1,4 @@
-# WeShare2.0
+# WeShare
 A video chat/meeting webapp using WebRTC and WebSockets (socket.io).
 
 ## Current Features?
@@ -13,6 +13,6 @@ A video chat/meeting webapp using WebRTC and WebSockets (socket.io).
 2. Responsive front-end for Rooms
 
 ## How to Run ?
---> `npm i` or `npm install` then `npm start`# weshareprod
-# weshareprod
-# weshareprod
+--> `npm i` or `npm install` then `npm start`
+
+
