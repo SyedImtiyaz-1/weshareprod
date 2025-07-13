@@ -3,7 +3,6 @@ const express = require("express");
 const http = require("http");
 const moment = require("moment");
 const socketio = require("socket.io");
-const sqlite3 = require("sqlite3").verbose();
 
 const PORT = process.env.PORT || 5008;
 
@@ -12,47 +11,18 @@ const server = http.createServer(app);
 
 const io = socketio(server);
 
-// SQLite setup
-const db = new sqlite3.Database("weshareData.db", (err) => {
-  if (err) {
-    console.error("Error connecting to SQLite database:", err.message);
-  } else {
-    console.log("Connected to SQLite database");
-    // Create a users table if it doesn't exist
-    db.run(
-      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, roomid TEXT)",
-      (createErr) => {
-        if (createErr) {
-          console.error("Error creating users table:", createErr);
-        } else {
-          console.log("Users table created successfully");
-        }
-      }
-    );
-
-    // Create a messages table if it doesn't exist
-    db.run(
-      "CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, user_id INTEGER, timestamp TEXT)",
-      (createErr) => {
-        if (createErr) {
-          console.error("Error creating messages table:", createErr);
-        } else {
-          console.log("Messages table created successfully");
-        }
-      }
-    );
-  }
-});
-
-
+// Serve static files from public directory
 app.use(express.static(path.join(__dirname, "public")));
 
+// In-memory storage for Vercel deployment (since SQLite won't work)
 let rooms = {};
 let socketroom = {};
 let socketname = {};
 let micSocket = {};
 let videoSocket = {};
 let roomBoard = {};
+let users = [];
+let messages = [];
 
 io.on("connect", (socket) => {
   socket.on("join room", (roomid, username) => {
@@ -62,18 +32,8 @@ io.on("connect", (socket) => {
     micSocket[socket.id] = "on";
     videoSocket[socket.id] = "on";
 
-    // SQLite: Insert user into the database
-    db.run(
-      "INSERT INTO users (username, roomid) VALUES (?, ?)",
-      [username, roomid],
-      (err) => {
-        if (err) {
-          console.error("Error inserting user into the SQLite database:", err);
-        } else {
-          console.log("User inserted into the SQLite database");
-        }
-      }
-    );
+    // Store user in memory (instead of SQLite)
+    users.push({ id: socket.id, username, roomid });
 
     if (rooms[roomid] && rooms[roomid].length > 0) {
       rooms[roomid].push(socket.id);
@@ -113,18 +73,13 @@ io.on("connect", (socket) => {
     // Emit the message to all clients in the room
     io.to(roomid).emit("message", msg, username, moment().format("h:mm a"));
   
-    // Store the message in the database
-    db.run(
-      "INSERT INTO messages (username, user_id, timestamp) VALUES (?, ?, ?)",
-      [username, userId, moment().format("YYYY-MM-DD HH:mm:ss")],
-      (err) => {
-        if (err) {
-          console.error("Error inserting message into the SQLite database:", err);
-        } else {
-          console.log("Message inserted into the SQLite database");
-        }
-      }
-    );
+    // Store message in memory (instead of SQLite)
+    messages.push({
+      username,
+      user_id: userId,
+      timestamp: moment().format("YYYY-MM-DD HH:mm:ss"),
+      message: msg
+    });
   });
 
   socket.on("video-offer", (offer, sid) => {
@@ -182,18 +137,12 @@ io.on("connect", (socket) => {
       "user count",
       rooms[socketroom[socket.id]].length
     );
+    
+    // Remove user from memory
+    users = users.filter(user => user.id !== socket.id);
+    
     delete socketroom[socket.id];
-    console.log("--------------------");
-    console.log(rooms[socketroom[socket.id]]);
-
-    // Close the SQLite database connection
-    db.close((err) => {
-      if (err) {
-        console.error("Error closing SQLite database:", err.message);
-      } else {
-        console.log("SQLite database connection closed");
-      }
-    });
+    console.log("User disconnected:", socket.id);
   });
 });
 
