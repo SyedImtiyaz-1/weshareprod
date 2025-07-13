@@ -1,20 +1,19 @@
 {
-  "name": "meetingRTC",
+  "name": "socket-project",
   "version": "1.0.0",
   "description": "A video chat/meeting webapp using WebRTC and WebSockets (socket.io).",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "react-scripts start",
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step needed - static files in public/'",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "build": "webpack"
+    "eject": "react-scripts eject"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "docker": "^1.0.0",
     "express": "^4.18.2",
     "moment": "^2.27.0",
     "mongoose": "^8.1.1",
