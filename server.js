@@ -9,12 +9,20 @@ const PORT = process.env.PORT || 5008;
 const app = express();
 const server = http.createServer(app);
 
-const io = socketio(server);
+// Configure Socket.IO for Vercel
+const io = socketio(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
+});
 
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, "public")));
 
-// In-memory storage for Vercel deployment (since SQLite won't work)
+// In-memory storage for Vercel deployment
 let rooms = {};
 let socketroom = {};
 let socketname = {};
@@ -24,15 +32,20 @@ let roomBoard = {};
 let users = [];
 let messages = [];
 
+// Add connection logging
 io.on("connect", (socket) => {
+  console.log("New client connected:", socket.id);
+  
   socket.on("join room", (roomid, username) => {
+    console.log(`User ${username} joining room: ${roomid}`);
+    
     socket.join(roomid);
     socketroom[socket.id] = roomid;
     socketname[socket.id] = username;
     micSocket[socket.id] = "on";
     videoSocket[socket.id] = "on";
 
-    // Store user in memory (instead of SQLite)
+    // Store user in memory
     users.push({ id: socket.id, username, roomid });
 
     if (rooms[roomid] && rooms[roomid].length > 0) {
@@ -58,6 +71,7 @@ io.on("connect", (socket) => {
     }
 
     io.to(roomid).emit("user count", rooms[roomid].length);
+    console.log(`Room ${roomid} now has ${rooms[roomid].length} users`);
   });
 
   socket.on("action", (msg) => {
@@ -123,7 +137,9 @@ io.on("connect", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
     if (!socketroom[socket.id]) return;
+    
     socket.to(socketroom[socket.id]).emit(
       "message",
       `${socketname[socket.id]} left the chat.`,

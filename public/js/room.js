@@ -1,4 +1,28 @@
-const socket = io();
+// Update Socket.IO connection with better error handling
+const socket = io({
+  transports: ['websocket', 'polling'],
+  timeout: 20000,
+  forceNew: true
+});
+
+// Add connection event listeners
+socket.on('connect', () => {
+  console.log('Connected to server');
+});
+
+socket.on('connect_error', (error) => {
+  console.error('Connection error:', error);
+  alert('Connection failed. Please refresh the page.');
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Disconnected:', reason);
+  if (reason === 'io server disconnect') {
+    // the disconnection was initiated by the server, reconnect manually
+    socket.connect();
+  }
+});
+
 const myvideo = document.querySelector("#vd1");
 const roomid = params.get("room");
 let username;
