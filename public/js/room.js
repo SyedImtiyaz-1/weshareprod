@@ -1,24 +1,25 @@
-// Update Socket.IO connection with better error handling
+// Enhanced Socket.IO connection
 const socket = io({
-  transports: ['websocket', 'polling'],
+  transports: ['polling', 'websocket'],
   timeout: 20000,
-  forceNew: true
+  forceNew: true,
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000
 });
 
-// Add connection event listeners
 socket.on('connect', () => {
   console.log('Connected to server');
 });
 
 socket.on('connect_error', (error) => {
   console.error('Connection error:', error);
-  alert('Connection failed. Please refresh the page.');
+  alert('Connection failed. Please refresh the page or try again later.');
 });
 
 socket.on('disconnect', (reason) => {
   console.log('Disconnected:', reason);
   if (reason === 'io server disconnect') {
-    // the disconnection was initiated by the server, reconnect manually
     socket.connect();
   }
 });

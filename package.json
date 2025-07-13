@@ -6,9 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "echo 'No build step needed - static files in public/'",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "echo 'No build step needed - static files in public/'"
   },
   "keywords": [],
   "author": "",
@@ -28,17 +26,5 @@
     "react-app-rewired": "^2.2.1",
     "react-scripts": "^5.0.1",
     "webpack-cli": "^5.1.4"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

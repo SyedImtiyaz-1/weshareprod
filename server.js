@@ -9,20 +9,26 @@ const PORT = process.env.PORT || 5008;
 const app = express();
 const server = http.createServer(app);
 
-// Configure Socket.IO for Vercel
+// Enhanced Socket.IO configuration for Vercel
 const io = socketio(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true
   },
-  transports: ['websocket', 'polling'],
-  allowEIO3: true
+  transports: ['polling', 'websocket'],
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
-// Serve static files from public directory
 app.use(express.static(path.join(__dirname, "public")));
 
-// In-memory storage for Vercel deployment
+// Add a health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 let rooms = {};
 let socketroom = {};
 let socketname = {};
@@ -32,9 +38,8 @@ let roomBoard = {};
 let users = [];
 let messages = [];
 
-// Add connection logging
 io.on("connect", (socket) => {
-  console.log("New client connected:", socket.id);
+  console.log("Client connected:", socket.id);
   
   socket.on("join room", (roomid, username) => {
     console.log(`User ${username} joining room: ${roomid}`);
@@ -45,7 +50,6 @@ io.on("connect", (socket) => {
     micSocket[socket.id] = "on";
     videoSocket[socket.id] = "on";
 
-    // Store user in memory
     users.push({ id: socket.id, username, roomid });
 
     if (rooms[roomid] && rooms[roomid].length > 0) {
@@ -71,7 +75,6 @@ io.on("connect", (socket) => {
     }
 
     io.to(roomid).emit("user count", rooms[roomid].length);
-    console.log(`Room ${roomid} now has ${rooms[roomid].length} users`);
   });
 
   socket.on("action", (msg) => {
@@ -154,14 +157,11 @@ io.on("connect", (socket) => {
       rooms[socketroom[socket.id]].length
     );
     
-    // Remove user from memory
     users = users.filter(user => user.id !== socket.id);
-    
     delete socketroom[socket.id];
-    console.log("User disconnected:", socket.id);
   });
 });
 
 server.listen(PORT, () =>
-  console.log(`Server is up and running on port http://localhost:${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 );
